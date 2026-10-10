@@ -1,0 +1,18 @@
+[project]
+name = "sidekick"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-core>=1.6.9",
+    "langchain-ollama>=1.1.0",
+    "langgraph>=1.2.14",
+]
+
+[project.scripts]
+sidekick = "sidekick.main:main"
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
