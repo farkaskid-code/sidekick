@@ -723,6 +723,7 @@ dependencies = [
     { name = "langchain-core" },
     { name = "langchain-ollama" },
     { name = "langgraph" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
@@ -730,6 +731,7 @@ requires-dist = [
     { name = "langchain-core", specifier = ">=1.6.9" },
     { name = "langchain-ollama", specifier = ">=1.1.0" },
     { name = "langgraph", specifier = ">=1.2.14" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
 ]
 
 [[package]]

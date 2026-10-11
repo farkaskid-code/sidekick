@@ -8,6 +8,7 @@ dependencies = [
     "langchain-core>=1.6.9",
     "langchain-ollama>=1.1.0",
     "langgraph>=1.2.14",
+    "pyyaml>=6.0.3",
 ]
 
 [project.scripts]

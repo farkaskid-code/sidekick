@@ -1,45 +1,12 @@
-import os
-from typing import Annotated, TypedDict
+from langchain_core.messages import HumanMessage
 
-from langchain_core.messages import BaseMessage, HumanMessage
-from langchain_ollama import ChatOllama
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import END, START, StateGraph
-from langgraph.graph.message import add_messages
-
-
-class AgentState(TypedDict):
-    messages: Annotated[list[BaseMessage], add_messages]
-
-
-OLLAMA_BASE_URL = os.getenv("OLLAMA_API_BASE")
-
-llm = ChatOllama(
-    model="qwen3:14b",  # Change to your target model
-    base_url=OLLAMA_BASE_URL,
-    temperature=0.5,
-)
-
-
-def call_model(state: AgentState):
-    response = llm.invoke(state["messages"])
-    return {"messages": [response]}
-
-
-builder = StateGraph(AgentState)
-
-builder.add_node("agent", call_model)
-
-builder.add_edge(START, "agent")
-builder.add_edge("agent", END)
-
-memory = MemorySaver()
-graph = builder.compile(checkpointer=memory)
+from sidekick.agent import graph
+from sidekick.config import runtime
 
 
 def main():
     print("=" * 60)
-    print(f"Ollama LangGraph Chat Loop Started via {OLLAMA_BASE_URL}")
+    print(f"Ollama LangGraph Chat Loop Started via {runtime.model.base_url}")
     print("Type 'exit' or 'quit' to end.")
     print("=" * 60)
 
