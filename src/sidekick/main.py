@@ -25,14 +25,12 @@ def main():
                 console.print("Goodbye!", "yellow")
                 break
 
-            # Execute graph stream
             events = graph.stream(
                 {"messages": [HumanMessage(content=user_input)]},
                 config=config,
                 stream_mode="values",
             )
 
-            # Retrieve final message output
             for event in events:
                 latest_msg = event["messages"][-1]
 

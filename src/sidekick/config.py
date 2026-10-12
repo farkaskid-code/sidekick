@@ -17,6 +17,8 @@ class Model:
     base_url: str
     name: str
     api_key: str = ""
+    num_ctx: int = 4096
+    temperature: float = 0.7
 
 
 @dataclass
@@ -32,6 +34,16 @@ def read_config() -> Config:
     if "model" in data:
         model_data = data["model"]
         model_config = Model(base_url=model_data["base_url"], name=model_data["name"])
+
+        if "api_key" in model_data:
+            model_config.api_key = model_data["api_key"]
+
+        if "num_ctx" in model_data:
+            model_config.api_key = model_data["num_ctx"]
+
+        if "temperature" in model_data:
+            model_config.api_key = model_data["temperature"]
+
         config.model = model_config
 
     return config
