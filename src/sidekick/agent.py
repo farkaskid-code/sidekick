@@ -1,14 +1,17 @@
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 
-from sidekick.nodes import State, call_model
+from sidekick.nodes import State, answer, research
 
 builder = StateGraph(State)
 
-builder.add_node("model", call_model)
+builder.add_node("research", research)
+builder.add_node("answer", answer)
 
-builder.add_edge(START, "model")
-builder.add_edge("model", END)
+builder.add_edge(START, "research")
+builder.add_edge("research", "answer")
+builder.add_edge("answer", END)
+
 
 memory = MemorySaver()
 

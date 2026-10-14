@@ -1,9 +1,6 @@
-from pathlib import Path
-from typing import Annotated, TypedDict
+from typing import TypedDict
 
-from langchain_core.messages import BaseMessage, SystemMessage, trim_messages
 from langchain_ollama import ChatOllama
-from langgraph.graph.message import add_messages
 from rich.console import Console
 
 from sidekick.config import runtime
@@ -17,26 +14,25 @@ model = ChatOllama(
 
 console = Console()
 
-SYSTEM_PROMPT = SystemMessage(content=(Path(__file__).parent / "prompt.md").read_text())
-
-trimmer = trim_messages(
-    max_tokens=int(runtime.model.num_ctx * 0.9),
-    token_counter="approximate",
-    strategy="last",
-    include_system=True,
-    start_on="human",
-)
-
 
 class State(TypedDict):
-    messages: Annotated[list[BaseMessage], add_messages]
+    question: str
+    research: str
+    answer: str
 
 
-def call_model(state: State):
-    messages = state["messages"]
-    if not any(msg == SYSTEM_PROMPT for msg in messages):
-        state["messages"] = [SYSTEM_PROMPT] + messages
+def research(state: State):
+    response = model.invoke(
+        "Research the following question and provide useful facts\n\n"
+        f"question: {state['question']}"
+    )
+    return {"research": response.content}
 
-    with console.status("[green]Thinking..."):
-        response = model.invoke(trimmer.invoke(state["messages"]))
-    return {"messages": [response]}
+
+def answer(state: State):
+    response = model.invoke(
+        "Answer the following question based on the provided research\n\n"
+        f"question: {state['question']}\n\n"
+        f"research: {state['research']}"
+    )
+    return {"answer": response.content}
