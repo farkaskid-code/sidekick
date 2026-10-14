@@ -14,7 +14,6 @@ builder.add_edge("planner", "research")
 builder.add_edge("research", "answer")
 builder.add_edge("answer", END)
 
-
 memory = MemorySaver()
 
 graph = builder.compile(memory)

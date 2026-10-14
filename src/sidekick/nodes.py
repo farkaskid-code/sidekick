@@ -4,6 +4,7 @@ from langchain_ollama import ChatOllama
 from rich.console import Console
 
 from sidekick.config import runtime
+from sidekick.helpers import web_search
 
 model = ChatOllama(
     model=runtime.model.name,
@@ -18,7 +19,7 @@ console = Console()
 class State(TypedDict):
     question: str
     research_topics: list[str]
-    research: str
+    research: list[str]
     answer: str
 
 
@@ -32,17 +33,14 @@ def plan(state: State):
 
 
 def research(state: State):
-    response = model.invoke(
-        "Research the following topics and provide useful facts\n\n"
-        f"topics: {'\n'.join(state['research_topics'])}"
-    )
-    return {"research": response.content}
+    return {"research": [web_search(topic) for topic in state["research_topics"]]}
 
 
 def answer(state: State):
+    print("\n\n==========\n\n".join(state["research"]))
     response = model.invoke(
         "Answer the following question based on the provided research\n\n"
         f"question: {state['question']}\n\n"
-        f"research: {state['research']}"
+        f"research: {'\n\n'.join(state['research'])}"
     )
     return {"answer": response.content}

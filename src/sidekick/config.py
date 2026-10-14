@@ -22,9 +22,16 @@ class Model:
 
 
 @dataclass
+class Web:
+    url: str
+    api_key: str
+
+
+@dataclass
 class Config:
     model: Model = None
     logging: Logging = field(default_factory=Logging)
+    web: Web = None
 
 
 def read_config() -> Config:
@@ -45,6 +52,10 @@ def read_config() -> Config:
             model_config.api_key = model_data["temperature"]
 
         config.model = model_config
+
+    if "web" in data:
+        web_data = data["web"]
+        config.web = Web(url=web_data["url"], api_key=web_data["api_key"])
 
     return config
 
