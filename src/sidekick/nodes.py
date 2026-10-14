@@ -17,14 +17,24 @@ console = Console()
 
 class State(TypedDict):
     question: str
+    research_topics: list[str]
     research: str
     answer: str
 
 
+def plan(state: State):
+    response = model.invoke(
+        "What topics should be researched to answer the following question?"
+        "Respond with a list of topics.\n\n"
+        f"question: {state['question']}"
+    )
+    return {"research_topics": response.content.splitlines()}
+
+
 def research(state: State):
     response = model.invoke(
-        "Research the following question and provide useful facts\n\n"
-        f"question: {state['question']}"
+        "Research the following topics and provide useful facts\n\n"
+        f"topics: {'\n'.join(state['research_topics'])}"
     )
     return {"research": response.content}
 
