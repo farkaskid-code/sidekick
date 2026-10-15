@@ -1,7 +1,8 @@
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 
-from sidekick.nodes import State, answer, plan, research
+from sidekick.data import State
+from sidekick.nodes import answer, plan, research
 
 builder = StateGraph(State)
 

@@ -1,11 +1,10 @@
 from json import loads
-from typing import TypedDict
 
 from langchain_ollama import ChatOllama
 from rich.console import Console
 
 from sidekick.config import runtime
-from sidekick.helpers import llm_search, web_search
+from sidekick.data import Research, ResearchPlan, ResearchResult, State
 
 model = ChatOllama(
     model=runtime.model.name,
@@ -16,30 +15,29 @@ model = ChatOllama(
 
 console = Console()
 
-
-class State(TypedDict):
-    question: str
-    research_topics: list[str]
-    research: list[str]
-    answer: str
-    passed: bool
-    notes: str
+# Planning
 
 
 def plan(state: State):
     with console.status("[green]Planning..."):
-        response = model.invoke(
-            "What topics should be researched to answer the following question?"
-            "Respond with a list of topics.\n\n"
+        response = model.with_structured_output(ResearchPlan).invoke(
+            "Give me a list of topics that should be researched to answer the following question?"
             f"question: {state['question']}"
         )
-    return {"research_topics": response.content.splitlines()}
+    return {"planning": response}
 
 
 def research(state: State):
-    return {
-        "research": [llm_search(model, topic) for topic in state["research_topics"]]
-    }
+    research = []
+    for topic in state["planning"].topics:
+        with console.status(f"[green]Researching: {topic}"):
+            response = model.with_structured_output(Research).invoke(
+                "Research the following topic and provide useful facts and information.\n"
+                + topic
+            )
+        research.append(response)
+
+    return {"research": ResearchResult(research=research)}
 
 
 def critique(state: State):
@@ -69,6 +67,6 @@ def answer(state: State):
         response = model.invoke(
             "Answer the following question based on the provided research\n\n"
             f"question: {state['question']}\n\n"
-            f"research: {'\n\n'.join(state['research'])}"
+            f"research: {state['research']}"
         )
     return {"answer": response.content}
