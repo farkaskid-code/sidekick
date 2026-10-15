@@ -5,6 +5,7 @@ from rich.console import Console
 
 from sidekick.config import runtime
 from sidekick.data import Research, ResearchPlan, ResearchResult, State
+from sidekick.helpers import web_search
 
 model = ChatOllama(
     model=runtime.model.name,
@@ -14,8 +15,6 @@ model = ChatOllama(
 )
 
 console = Console()
-
-# Planning
 
 
 def plan(state: State):
@@ -36,6 +35,16 @@ def research(state: State):
                 + topic
             )
         research.append(response)
+
+    return {"research": ResearchResult(research=research)}
+
+
+def web_research(state: State):
+    research = []
+    for topic in state["planning"].topics:
+        with console.status(f"[green]Searching on the web: {topic}"):
+            response = web_search(topic)
+        research.append(Research(topic=topic, content=response))
 
     return {"research": ResearchResult(research=research)}
 
