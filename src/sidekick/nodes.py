@@ -20,7 +20,7 @@ console = Console()
 def plan(state: State):
     with console.status("[green]Planning..."):
         response = model.with_structured_output(ResearchPlan).invoke(
-            "Give me a list of topics that should be researched to answer the following question?"
+            "Give me a list of 3-4 topics that should be researched to answer the following question?"
             f"question: {state['question']}"
         )
     return {"planning": response}
@@ -31,7 +31,7 @@ def research(state: State):
     for topic in state["planning"].topics:
         with console.status(f"[green]Researching: {topic}"):
             response = model.with_structured_output(Information).invoke(
-                "Research the following topic and provide useful facts and information.\n"
+                "Research the following topic and provide a summary of useful facts and information.\n"
                 + topic
             )
         research.append(response)
@@ -50,13 +50,14 @@ def web_research(state: State):
 
 
 def critique(state: State):
-    response = model.with_structured_output(Critique).invoke(
-        "critique the following answer for the question based on the given research"
-        " to decide if it passes or fails as an answer and does it require additional research. "
-        f"question: {state['question']}\n----\n"
-        f"research: {state['research']}\n----\n"
-        f"answer: {state['answer']}"
-    )
+    with console.status("[green]Evaluating the answer"):
+        response = model.with_structured_output(Critique).invoke(
+            "critique the following answer for the question based on the given research"
+            " to decide if it passes or fails as an answer and does it require additional research. "
+            f"question: {state['question']}\n----\n"
+            f"research: {state['research']}\n----\n"
+            f"answer: {state['answer']}"
+        )
     return {"critique": response}
 
 

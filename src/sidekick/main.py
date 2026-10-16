@@ -20,12 +20,14 @@ def main():
                 console.print("Goodbye!", style="yellow")
                 break
 
-            state = {"question": user_input}
             values = list(
-                graph.stream(input=state, config=config, stream_mode="values")
+                graph.stream(
+                    input={"question": user_input}, config=config, stream_mode="values"
+                )
             )
 
-            answer = values[-1].get("answer", None) or "Failed to research"
+            answer = values[-1].get("answer", None)
+            print(values[-1]["critique"])
 
             if answer:
                 console.print(Rule())
