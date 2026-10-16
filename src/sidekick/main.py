@@ -21,11 +21,11 @@ def main():
                 break
 
             state = {"question": user_input}
-            answer = None
+            values = list(
+                graph.stream(input=state, config=config, stream_mode="values")
+            )
 
-            for event in graph.stream(input=state, config=config, stream_mode="values"):
-                if "answer" in event:
-                    answer = event["answer"]
+            answer = values[-1].get("answer", None) or "Failed to research"
 
             if answer:
                 console.print(Rule())

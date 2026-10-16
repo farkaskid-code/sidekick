@@ -4,7 +4,7 @@ from langchain_ollama import ChatOllama
 from rich.console import Console
 
 from sidekick.config import runtime
-from sidekick.data import Research, ResearchPlan, ResearchResult, State
+from sidekick.data import Critique, Information, Research, ResearchPlan, State
 from sidekick.helpers import web_search
 
 model = ChatOllama(
@@ -30,13 +30,13 @@ def research(state: State):
     research = []
     for topic in state["planning"].topics:
         with console.status(f"[green]Researching: {topic}"):
-            response = model.with_structured_output(Research).invoke(
+            response = model.with_structured_output(Information).invoke(
                 "Research the following topic and provide useful facts and information.\n"
                 + topic
             )
         research.append(response)
 
-    return {"research": ResearchResult(research=research)}
+    return {"research": Research(topics=research)}
 
 
 def web_research(state: State):
@@ -44,31 +44,20 @@ def web_research(state: State):
     for topic in state["planning"].topics:
         with console.status(f"[green]Searching on the web: {topic}"):
             response = web_search(topic)
-        research.append(Research(topic=topic, content=response))
+        research.append(Information(topic=topic, content=response))
 
-    return {"research": ResearchResult(research=research)}
+    return {"research": Research(topics=research)}
 
 
 def critique(state: State):
-    response = model.invoke(
-        "critique the following answer generated for the question based on the given research"
-        " to decide if it passes or fails as an answer and requires additional research. "
-        "Return a JSON response with the following information: "
-        "'passed': a boolean indicating if the answer passes\n"
-        "'notes': Your notes for passing or failing the answer\n"
-        "'additional_research': A list of strings containing additional research topics to incorporate if required\n\n\n"
-        "====\n"
+    response = model.with_structured_output(Critique).invoke(
+        "critique the following answer for the question based on the given research"
+        " to decide if it passes or fails as an answer and does it require additional research. "
         f"question: {state['question']}\n----\n"
-        f"research: {'\n####\n'.join(state['research'])}\n----\n"
+        f"research: {state['research']}\n----\n"
         f"answer: {state['answer']}"
     )
-    print(response.content)
-    data = loads(response.content)
-    return {
-        "passed": data["passed"],
-        "notes": data["notes"],
-        "research_topics": state["research_topics"] + data["additional_research"],
-    }
+    return {"critique": response}
 
 
 def answer(state: State):

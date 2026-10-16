@@ -7,7 +7,7 @@ class ResearchPlan(BaseModel):
     topics: list[str] = Field(description="List of research topics")
 
 
-class Research(BaseModel):
+class Information(BaseModel):
     topic: str = Field(description="Title of the research topic")
     content: str = Field(description="Research content")
 
@@ -15,17 +15,28 @@ class Research(BaseModel):
         return f"Topic: {self.topic}\n----\nContent: {self.content}"
 
 
-class ResearchResult(BaseModel):
-    research: list[Research] = Field(
+class Research(BaseModel):
+    topics: list[Information] = Field(
         description="A list of research for all the different topics"
     )
 
     def __str__(self) -> str:
-        return "\n\n====\n\n".join([str(r) for r in self.research])
+        return "\n\n====\n\n".join([str(r) for r in self.topics])
+
+
+class Critique(BaseModel):
+    passed: bool = Field(
+        description="If the answer is ok and doesn't need more changes"
+    )
+    notes: str = Field(description="Notes after the evaluation")
+    additional_research: list[str] = Field(
+        description="Additional topics to be researched if required"
+    )
 
 
 class State(TypedDict):
     question: str
     planning: ResearchPlan
-    research: ResearchResult
+    research: Research
     answer: str
+    critique: Critique
