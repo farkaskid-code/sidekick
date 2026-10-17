@@ -1,5 +1,3 @@
-from json import loads
-
 from langchain_ollama import ChatOllama
 from rich.console import Console
 
@@ -27,16 +25,21 @@ def plan(state: State):
 
 
 def research(state: State):
-    research = []
+    topics_info = []
     for topic in state["planning"].topics:
         with console.status(f"[green]Researching: {topic}"):
             response = model.with_structured_output(Information).invoke(
                 "Research the following topic and provide a summary of useful facts and information.\n"
                 + topic
             )
-        research.append(response)
+        topics_info.append(response)
 
-    return {"research": Research(topics=research)}
+    new_research = Research(topics=topics_info)
+    existing_research = state.get("research", None)
+    if existing_research:
+        new_research = Research(topics=existing_research.topics + topics_info)
+
+    return {"research": new_research, "planning": ResearchPlan(topics=[])}
 
 
 def web_research(state: State):
@@ -51,14 +54,17 @@ def web_research(state: State):
 
 def critique(state: State):
     with console.status("[green]Evaluating the answer"):
-        response = model.with_structured_output(Critique).invoke(
-            "critique the following answer for the question based on the given research"
-            " to decide if it passes or fails as an answer and does it require additional research. "
+        response: Critique = model.with_structured_output(Critique).invoke(
+            "critique the answer to evaluate if it needs more research\n"
             f"question: {state['question']}\n----\n"
             f"research: {state['research']}\n----\n"
             f"answer: {state['answer']}"
         )
-    return {"critique": response}
+    print(response)
+    return {
+        "critique": response,
+        "planning": ResearchPlan(topics=response.additional_research),
+    }
 
 
 def answer(state: State):

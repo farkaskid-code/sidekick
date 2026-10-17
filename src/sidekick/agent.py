@@ -11,11 +11,18 @@ builder.add_node("plan", plan)
 builder.add_node("answer", answer)
 builder.add_node("critique", critique)
 
+
+def needs_more_research(state: State):
+    return "no" if len(state["critique"].additional_research) == 0 else "yes"
+
+
 builder.add_edge(START, "plan")
 builder.add_edge("plan", "research")
 builder.add_edge("research", "answer")
 builder.add_edge("answer", "critique")
-builder.add_edge("critique", END)
+builder.add_conditional_edges(
+    "critique", needs_more_research, {"yes": "research", "no": END}
+)
 
 memory = MemorySaver()
 

@@ -26,11 +26,11 @@ class Research(BaseModel):
 
 class Critique(BaseModel):
     passed: bool = Field(
-        description="If the answer is ok and doesn't need more changes"
+        description="If the answer is ok and doesn't need more research"
     )
-    notes: str = Field(description="Notes after the evaluation")
+    notes: str = Field(description="A brief one/two line verdict of the evaluation")
     additional_research: list[str] = Field(
-        description="Additional topics to be researched if required"
+        description="Additional research topics if required"
     )
 
 

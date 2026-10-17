@@ -27,8 +27,6 @@ def main():
             )
 
             answer = values[-1].get("answer", None)
-            print(values[-1]["critique"])
-
             if answer:
                 console.print(Rule())
                 console.print("sidekick: ", style="green", end="")
