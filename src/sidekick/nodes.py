@@ -33,6 +33,7 @@ def research(state: State):
                 + topic
             )
         topics_info.append(response)
+        console.print(f"Researched: {topic}", style="yellow")
 
     new_research = Research(topics=topics_info)
     existing_research = state.get("research", None)
@@ -60,7 +61,10 @@ def critique(state: State):
             f"research: {state['research']}\n----\n"
             f"answer: {state['answer']}"
         )
-    print(response)
+    console.print(
+        f"Evaluation: {response.notes}",
+        style="green" if len(response.additional_research) == 0 else "red",
+    )
     return {
         "critique": response,
         "planning": ResearchPlan(topics=response.additional_research),
@@ -68,7 +72,7 @@ def critique(state: State):
 
 
 def answer(state: State):
-    with console.status("[green]Putting togather all the pieces..."):
+    with console.status("[green]Crafting the answer..."):
         response = model.invoke(
             "Answer the following question based on the provided research\n\n"
             f"question: {state['question']}\n\n"
