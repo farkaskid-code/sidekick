@@ -22,6 +22,12 @@ class Model:
 
 
 @dataclass
+class Models:
+    small: Model = None
+    large: Model = None
+
+
+@dataclass
 class Web:
     url: str
     api_key: str
@@ -29,30 +35,36 @@ class Web:
 
 @dataclass
 class Config:
-    model: Model = None
+    models: Models = None
     logging: Logging = field(default_factory=Logging)
     web: Web = None
     max_loops: int = 3
+
+
+def read_model_config(data: dict) -> Model:
+    model = Model(base_url=data["base_url"], name=data["name"])
+
+    if "api_key" in data:
+        model.api_key = data["api_key"]
+
+    if "num_ctx" in data:
+        model.num_ctx = data["num_ctx"]
+
+    if "temperature" in data:
+        model.temperature = data["temperature"]
+
+    return model
 
 
 def read_config() -> Config:
     data = safe_load(Path(DATADIR / "config.yaml").read_text())
     config = Config()
 
-    if "model" in data:
-        model_data = data["model"]
-        model_config = Model(base_url=model_data["base_url"], name=model_data["name"])
+    if "models" in data:
+        small_model = read_model_config(data["models"]["small"])
+        large_model = read_model_config(data["models"]["large"])
 
-        if "api_key" in model_data:
-            model_config.api_key = model_data["api_key"]
-
-        if "num_ctx" in model_data:
-            model_config.api_key = model_data["num_ctx"]
-
-        if "temperature" in model_data:
-            model_config.api_key = model_data["temperature"]
-
-        config.model = model_config
+        config.models = Models(small=small_model, large=large_model)
 
     if "web" in data:
         web_data = data["web"]

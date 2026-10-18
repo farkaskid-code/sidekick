@@ -17,7 +17,7 @@ def needs_more_research(state: State):
     return (
         "no"
         if len(state["critique"].additional_research) == 0
-        or state["loop_count"] < runtime.max_loops
+        or state["loop_count"] >= runtime.max_loops
         else "yes"
     )
 
