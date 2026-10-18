@@ -14,7 +14,9 @@ def main():
 
     values = list(
         graph.stream(
-            input={"question": user_input}, config=config, stream_mode="values"
+            input={"question": user_input, "loop_count": 0},
+            config=config,
+            stream_mode="values",
         )
     )
 

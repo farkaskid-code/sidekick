@@ -32,6 +32,7 @@ class Config:
     model: Model = None
     logging: Logging = field(default_factory=Logging)
     web: Web = None
+    max_loops: int = 3
 
 
 def read_config() -> Config:
@@ -56,6 +57,9 @@ def read_config() -> Config:
     if "web" in data:
         web_data = data["web"]
         config.web = Web(url=web_data["url"], api_key=web_data["api_key"])
+
+    if "max_loops" in data:
+        config.max_loops = data["max_loops"]
 
     return config
 

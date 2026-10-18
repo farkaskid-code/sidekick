@@ -40,3 +40,4 @@ class State(TypedDict):
     research: Research
     answer: str
     critique: Critique
+    loop_count: int

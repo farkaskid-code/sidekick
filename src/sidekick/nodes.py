@@ -67,6 +67,7 @@ def critique(state: State):
     )
     return {
         "critique": response,
+        "loop_count": state["loop_count"] + 1,
         "planning": ResearchPlan(topics=response.additional_research),
     }
 

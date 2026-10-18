@@ -1,6 +1,7 @@
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 
+from sidekick.config import runtime
 from sidekick.data import State
 from sidekick.nodes import answer, critique, plan, research, web_research
 
@@ -13,7 +14,12 @@ builder.add_node("critique", critique)
 
 
 def needs_more_research(state: State):
-    return "no" if len(state["critique"].additional_research) == 0 else "yes"
+    return (
+        "no"
+        if len(state["critique"].additional_research) == 0
+        or state["loop_count"] < runtime.max_loops
+        else "yes"
+    )
 
 
 builder.add_edge(START, "plan")
