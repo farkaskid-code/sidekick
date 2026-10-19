@@ -1,5 +1,6 @@
-from typing import TypedDict
+from typing import Annotated, TypedDict
 
+from langgraph.graph import add_messages
 from pydantic import BaseModel, Field
 
 
@@ -35,6 +36,7 @@ class Critique(BaseModel):
 
 
 class State(TypedDict):
+    messages: Annotated[list, add_messages]
     question: str
     planning: ResearchPlan
     research: Research

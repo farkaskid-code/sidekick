@@ -4,7 +4,7 @@ from rich.console import Console
 
 from sidekick.config import runtime
 from sidekick.data import Critique, Information, Research, ResearchPlan, State
-from sidekick.helpers import web_search
+from sidekick.tools import web_search
 
 small_model = ChatOllama(
     model=runtime.models.small.name,
@@ -19,6 +19,8 @@ large_model = ChatOllama(
     num_ctx=runtime.models.large.num_ctx,
     temperature=runtime.models.large.temperature,
 )
+
+research_model = large_model.bind_tools([web_search])
 
 console = Console()
 
@@ -40,12 +42,14 @@ def plan(state: State):
 def research(state: State):
     system_msg = SystemMessage(
         "You are a researcher whose job is to provide a summary of "
-        "useful facts and information for the topic given by the user"
+        "useful facts and information for the topic given by the user. "
+        "Use web_search when you need external information."
+        "You may perform multiple searches if necessary"
     )
     topics_info = []
     for topic in state["planning"].topics:
         with console.status(f"[green]Researching: {topic}"):
-            response = large_model.with_structured_output(Information).invoke(
+            response = research_model.with_structured_output(Information).invoke(
                 [system_msg, HumanMessage(topic)]
             )
         topics_info.append(response)
