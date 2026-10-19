@@ -1,3 +1,4 @@
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from rich.console import Console
 
@@ -23,21 +24,29 @@ console = Console()
 
 
 def plan(state: State):
+    messages = [
+        SystemMessage(
+            "You are research planner whose job is to provide 3-4 topics"
+            " that should be researched to answer the user's query?"
+        ),
+        HumanMessage(f"question: {state['question']}"),
+    ]
     with console.status("[green]Planning..."):
-        response = large_model.with_structured_output(ResearchPlan).invoke(
-            "Give me a list of 3-4 topics that should be researched to answer the following question?"
-            f"question: {state['question']}"
-        )
+        response = large_model.with_structured_output(ResearchPlan).invoke(messages)
+
     return {"planning": response}
 
 
 def research(state: State):
+    system_msg = SystemMessage(
+        "You are a researcher whose job is to provide a summary of "
+        "useful facts and information for the topic given by the user"
+    )
     topics_info = []
     for topic in state["planning"].topics:
         with console.status(f"[green]Researching: {topic}"):
             response = large_model.with_structured_output(Information).invoke(
-                "Research the following topic and provide a summary of useful facts and information.\n"
-                + topic
+                [system_msg, HumanMessage(topic)]
             )
         topics_info.append(response)
         console.print(f"Researched: {topic}", style="yellow")
@@ -61,17 +70,28 @@ def web_research(state: State):
 
 
 def critique(state: State):
+    messages = [
+        SystemMessage(
+            "You are critic whose job is to critique the answer for a given question "
+            "based on the provided research. Tell the user if the answer needs additional research "
+            "and provide those research topics as additional research."
+        ),
+        HumanMessage(
+            f"## Question\n{state['question']}\n\n"
+            f"## Answer\n{state['answer']}\n\n"
+            f"## Research:\n{state['research']}"
+        ),
+    ]
     with console.status("[green]Evaluating the answer"):
         response: Critique = small_model.with_structured_output(Critique).invoke(
-            "critique the answer to evaluate if it needs more research\n"
-            f"question: {state['question']}\n----\n"
-            f"research: {state['research']}\n----\n"
-            f"answer: {state['answer']}"
+            messages
         )
+
     console.print(
         f"Evaluation: {response.notes}",
         style="green" if len(response.additional_research) == 0 else "red",
     )
+
     return {
         "critique": response,
         "loop_count": state["loop_count"] + 1,
@@ -80,10 +100,15 @@ def critique(state: State):
 
 
 def answer(state: State):
+    messages = [
+        SystemMessage(
+            "Your job is to craft a detailed answer based to the user "
+            "question based on the research provided."
+        ),
+        HumanMessage(
+            f"## Question\n{state['question']}\n\n## Research\n{state['research']}"
+        ),
+    ]
     with console.status("[green]Crafting the answer..."):
-        response = small_model.invoke(
-            "Answer the following question based on the provided research\n\n"
-            f"question: {state['question']}\n\n"
-            f"research: {state['research']}"
-        )
+        response = small_model.invoke(messages)
     return {"answer": response.content}

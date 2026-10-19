@@ -12,7 +12,7 @@ class Information(BaseModel):
     content: str = Field(description="Research content")
 
     def __str__(self) -> str:
-        return f"Topic: {self.topic}\n----\nContent: {self.content}"
+        return f"### Topic\n{self.topic}\n\n### Content\n{self.content}"
 
 
 class Research(BaseModel):
@@ -21,7 +21,7 @@ class Research(BaseModel):
     )
 
     def __str__(self) -> str:
-        return "\n\n====\n\n".join([str(r) for r in self.topics])
+        return "\n---\n".join([str(r) for r in self.topics])
 
 
 class Critique(BaseModel):
