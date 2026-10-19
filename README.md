@@ -10,23 +10,37 @@ A research assistant designed for topical and deep research on any given query u
 
 - Clone the repository.
 - Install it using: `uv tool install .`.
-- Create a configuration file.
+- Create a configuration file. Details below.
 - Run using `sidekick {query}`
 
 ## Configuration file
 The file is located at `~/.sidekick/config.yaml` with the following format,
 
 ```markdown
-model:
-  base_url: {ollama server URL}
-  name: {model_name}
-  num_ctx: 4096 # Set the largest possible value for your local setup, this helps with research context.
+models:
+  small: # used for the critic and answer node. Smaller models are used to maximise the context size on a given hardware.
+    base_url: {ollama server URL}
+    name: {model_name}
+    num_ctx: 32768
+  large: # used for planning and research nodes. Larger models help with thorough research.
+    base_url: {ollama server URL}
+    name: {model_name}
+    num_ctx: 8192
 
-web:
+web: # Optional 
   url: {Tavily URL}
   api_key: {Tavily API key}
+
+logging: # Optional
+  mode: w # logging mode. `w` for write and `a` for append.
+  level: INFO # logging level. DEBUG, INFO, ERROR etc.
+
+max_loops: 3 # Optional, caps the number of research <-> Critic loops.
 ```
 
 ## Notes
 
-Sidekick features a `researcher` <-> `critic` quality gate loop that ensures the coverages and research of all possible topics pertaining to a query. This can consume significant time and token budget.
+- Sidekick features a `researcher` <-> `critic` loop as a quality gate that ensures the coverages and research of all possible topics pertaining to a query. This can consume significant time and token budget.
+- It uses different size models for different roles. 
+- `Planning` and `Research` will use larger and smarter models as they don't need as much context.
+- `Critic` and `Answer` nodes will use a smaller model to fit more context.
