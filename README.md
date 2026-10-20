@@ -13,6 +13,11 @@ A research assistant designed for topical and deep research on any given query u
 - Create a configuration file. Details below.
 - Run using `sidekick {query}`
 
+## Agent Graph
+Following diagram illustrates the general flow for each query.
+
+<img width="1785" height="885" alt="graph" src="https://github.com/user-attachments/assets/3ff9912d-8b72-422e-b69a-46a5f390723c" />
+
 ## Configuration file
 The file is located at `~/.sidekick/config.yaml` with the following format,
 
