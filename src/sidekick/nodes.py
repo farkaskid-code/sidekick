@@ -49,11 +49,11 @@ def research(state: State):
     )
     topics_info = []
     for topic in state["planning"].topics:
-        console.print(f"[green]Researching: {topic}")
-        response = agent.invoke(
-            {"messages": [system_msg, HumanMessage(topic)]},
-            config={"configurable": {"thread_id": "search"}},
-        )
+        with console.status(f"[green]Researching: {topic}"):
+            response = agent.invoke(
+                {"messages": [system_msg, HumanMessage(topic)]},
+                config={"configurable": {"thread_id": "search"}},
+            )
         topics_info.append(
             Information(topic=topic, content=response["messages"][-1].content)
         )
