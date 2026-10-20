@@ -4,6 +4,7 @@ from rich.console import Console
 
 from sidekick.config import runtime
 from sidekick.data import Critique, Information, Research, ResearchPlan, State
+from sidekick.research import agent
 from sidekick.tools import web_search
 
 small_model = ChatOllama(
@@ -48,11 +49,14 @@ def research(state: State):
     )
     topics_info = []
     for topic in state["planning"].topics:
-        with console.status(f"[green]Researching: {topic}"):
-            response = research_model.with_structured_output(Information).invoke(
-                [system_msg, HumanMessage(topic)]
-            )
-        topics_info.append(response)
+        console.print(f"[green]Researching: {topic}")
+        response = agent.invoke(
+            {"messages": [system_msg, HumanMessage(topic)]},
+            config={"configurable": {"thread_id": "search"}},
+        )
+        topics_info.append(
+            Information(topic=topic, content=response["messages"][-1].content)
+        )
         console.print(f"Researched: {topic}", style="yellow")
 
     new_research = Research(topics=topics_info)
@@ -61,16 +65,6 @@ def research(state: State):
         new_research = Research(topics=existing_research.topics + topics_info)
 
     return {"research": new_research, "planning": ResearchPlan(topics=[])}
-
-
-def web_research(state: State):
-    research = []
-    for topic in state["planning"].topics:
-        with console.status(f"[green]Searching on the web: {topic}"):
-            response = web_search(topic)
-        research.append(Information(topic=topic, content=response))
-
-    return {"research": Research(topics=research)}
 
 
 def critique(state: State):

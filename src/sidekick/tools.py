@@ -11,13 +11,13 @@ console = Console()
 def web_search(query: str) -> str:
     """Search the web for current and factual information"""
 
-    with console.status(f"[blue]Web Search: {query}"):
+    with console.status(f"[blue]Searching: {query}"):
         response = requests.post(
             url=runtime.web.url,
             json={"api_key": runtime.web.api_key, "query": query, "max_results": 3},
         )
 
-    console.print(f"Searched: {query}", style="blue")
+    console.print(f"Web Search: {query}", style="blue")
 
     results = []
 
