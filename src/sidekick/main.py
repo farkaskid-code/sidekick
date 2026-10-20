@@ -12,15 +12,12 @@ def main():
     user_input = parse_args().query.strip()
     config = {"configurable": {"thread_id": "session"}}
 
-    values = list(
-        graph.stream(
-            input={"question": user_input, "loop_count": 0},
-            config=config,
-            stream_mode="values",
-        )
+    result = graph.invoke(
+        input={"question": user_input, "loop_count": 0},
+        config=config,
     )
 
-    answer = values[-1].get("answer", None)
+    answer = result.get("answer", None)
     if answer:
         console.print(Rule())
         console.print("sidekick: ", style="green", end="")
