@@ -27,7 +27,7 @@ models:
     name: {model_name}
     num_ctx: 8192
 
-web: # Optional 
+web: # Required for the "research" sub-agent
   url: {Tavily URL}
   api_key: {Tavily API key}
 
@@ -41,6 +41,7 @@ max_loops: 3 # Optional, caps the number of research <-> Critic loops.
 ## Notes
 
 - Sidekick features a `researcher` <-> `critic` loop as a quality gate that ensures the coverages and research of all possible topics pertaining to a query. This can consume significant time and token budget.
-- It uses different size models for different roles. 
+- Research node calls a sub-agent for research with access to `web_search`.
+- Uses different size models for different roles. 
 - `Planning` and `Research` will use larger and smarter models as they don't need as much context.
 - `Critic` and `Answer` nodes will use a smaller model to fit more context.
