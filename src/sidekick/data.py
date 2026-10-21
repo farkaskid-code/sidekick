@@ -41,3 +41,26 @@ class State(TypedDict):
     answer: str
     critique: Critique
     loop_count: int
+
+
+PROMPT = {
+    "plan": (
+        "You are research planner whose job is to provide 3-4 topics"
+        " that should be researched to answer the user's query?"
+    ),
+    "research": (
+        "You are a researcher whose job is to provide a summary of "
+        "useful facts and information for the topic given by the user. "
+        "Use web_search when you need external information."
+        "You may perform multiple searches if necessary"
+    ),
+    "critic": (
+        "You are critic whose job is to critique the answer for a given question "
+        "based on the provided research. Tell the user if the answer needs additional research "
+        "and provide those research topics as additional research."
+    ),
+    "answer": (
+        "Your job is to craft a detailed answer based to the user "
+        "question based on the research provided."
+    ),
+}

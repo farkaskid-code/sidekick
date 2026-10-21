@@ -3,7 +3,7 @@ from langchain_ollama import ChatOllama
 from rich.console import Console
 
 from sidekick.config import runtime
-from sidekick.data import Critique, Information, Research, ResearchPlan, State
+from sidekick.data import PROMPT, Critique, Information, Research, ResearchPlan, State
 from sidekick.search import search_agent
 from sidekick.tools import web_search
 
@@ -28,10 +28,7 @@ console = Console()
 
 def plan(state: State):
     messages = [
-        SystemMessage(
-            "You are research planner whose job is to provide 3-4 topics"
-            " that should be researched to answer the user's query?"
-        ),
+        SystemMessage(PROMPT.get("plan")),
         HumanMessage(f"question: {state['question']}"),
     ]
     with console.status("[green]Planning..."):
@@ -41,12 +38,7 @@ def plan(state: State):
 
 
 def research(state: State):
-    system_msg = SystemMessage(
-        "You are a researcher whose job is to provide a summary of "
-        "useful facts and information for the topic given by the user. "
-        "Use web_search when you need external information."
-        "You may perform multiple searches if necessary"
-    )
+    system_msg = SystemMessage(PROMPT.get("research"))
     topics_info = []
     for topic in state["planning"].topics:
         with console.status(f"[green]Researching: {topic}"):
@@ -69,11 +61,7 @@ def research(state: State):
 
 def critique(state: State):
     messages = [
-        SystemMessage(
-            "You are critic whose job is to critique the answer for a given question "
-            "based on the provided research. Tell the user if the answer needs additional research "
-            "and provide those research topics as additional research."
-        ),
+        SystemMessage(PROMPT.get("critic")),
         HumanMessage(
             f"## Question\n{state['question']}\n\n"
             f"## Answer\n{state['answer']}\n\n"
@@ -99,10 +87,7 @@ def critique(state: State):
 
 def answer(state: State):
     messages = [
-        SystemMessage(
-            "Your job is to craft a detailed answer based to the user "
-            "question based on the research provided."
-        ),
+        SystemMessage(PROMPT.get("answer")),
         HumanMessage(
             f"## Question\n{state['question']}\n\n## Research\n{state['research']}"
         ),
