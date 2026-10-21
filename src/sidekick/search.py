@@ -11,15 +11,15 @@ from sidekick.tools import web_search
 
 
 # State
-class ResearchState(TypedDict):
+class SearchState(TypedDict):
     messages: Annotated[list, add_messages]
 
 
-builder = StateGraph(ResearchState)
+builder = StateGraph(SearchState)
 
 
 # Nodes
-research_model = ChatOllama(
+search_model = ChatOllama(
     model=runtime.models.small.name,
     base_url=runtime.models.small.base_url,
     num_ctx=runtime.models.small.num_ctx,
@@ -29,20 +29,20 @@ research_model = ChatOllama(
 console = Console()
 
 
-def research(state: ResearchState):
-    response = research_model.invoke(state["messages"])
+def search(state: SearchState):
+    response = search_model.invoke(state["messages"])
 
     return {"messages": [response]}
 
 
-builder.add_node("research", research)
+builder.add_node("search", search)
 builder.add_node("search_tool", ToolNode([web_search]))
 
 # Edges
-builder.add_edge(START, "research")
+builder.add_edge(START, "search")
 builder.add_conditional_edges(
-    "research", tools_condition, {"tools": "search_tool", END: END}
+    "search", tools_condition, {"tools": "search_tool", END: END}
 )
-builder.add_edge("search_tool", "research")
+builder.add_edge("search_tool", "search")
 
-agent = builder.compile(MemorySaver())
+search_agent = builder.compile(MemorySaver())
