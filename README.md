@@ -13,11 +13,6 @@ A research assistant designed for topical and deep research on any given query u
 - Create a configuration file. Details below.
 - Run using `sidekick {query}`
 
-## Agent Graph
-Following diagram illustrates the general flow for each query.
-
-<img width="1785" height="885" alt="graph" src="https://github.com/user-attachments/assets/3ff9912d-8b72-422e-b69a-46a5f390723c" />
-
 ## Configuration file
 The file is located at `~/.sidekick/config.yaml` with the following format,
 
@@ -43,10 +38,15 @@ logging: # Optional
 max_loops: 3 # Optional, caps the number of research <-> Critic loops.
 ```
 
+## Agent Graph
+Following diagram illustrates the general flow for each query.
+
+<img width="1785" height="885" alt="graph" src="https://github.com/user-attachments/assets/3ff9912d-8b72-422e-b69a-46a5f390723c" />
+
 ## Notes
 
 - Sidekick features a `researcher` <-> `critic` loop as a quality gate that ensures the coverages and research of all possible topics pertaining to a query. This can consume significant time and token budget.
-- Research node calls a sub-agent for research with access to `web_search`.
+- Planning and Research nodes call a search sub-agent for research with access to `web_search`.
 - Uses different size models for different roles. 
 - `Planning` and `Research` will use larger and smarter models as they don't need as much context.
 - `Critic` and `Answer` nodes will use a smaller model to fit more context.
