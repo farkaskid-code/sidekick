@@ -32,9 +32,17 @@ def plan(state: State):
         HumanMessage(f"question: {state['question']}"),
     ]
     with console.status("[green]Planning..."):
-        response = large_model.with_structured_output(ResearchPlan).invoke(messages)
+        response = search_agent.invoke(
+            {"messages": messages},
+            config={"configurable": {"thread_id": "planning_search"}},
+        )
 
-    return {"planning": response}
+    topics = response.get("messages")[-1].content
+    return {
+        "planning": ResearchPlan(
+            topics=[topic.strip() for topic in topics.strip().splitlines()]
+        )
+    }
 
 
 def research(state: State):

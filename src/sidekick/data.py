@@ -46,7 +46,10 @@ class State(TypedDict):
 PROMPT = {
     "plan": (
         "You are research planner whose job is to provide 3-4 topics"
-        " that should be researched to answer the user's query?"
+        " that should be researched to answer the user's query? "
+        "Output a simple list with topic names. "
+        "Use web_search when you need external information."
+        "You may perform multiple searches if necessary"
     ),
     "research": (
         "You are a researcher whose job is to provide a summary of "
