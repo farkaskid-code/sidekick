@@ -5,6 +5,7 @@ A research assistant designed for topical and deep research on any given query u
 ## Prerequisites
 - A local [Ollama](https://ollama.com/) server.
 - [UV](https://docs.astral.sh/uv/getting-started/installation/) package manager.
+- A [Tavily](https://www.tavily.com/) API key.
 
 ## Getting Started
 
