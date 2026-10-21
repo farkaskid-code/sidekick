@@ -41,7 +41,7 @@ max_loops: 3 # Optional, caps the number of research <-> Critic loops.
 ## Agent Graph
 Following diagram illustrates the general flow for each query.
 
-<img width="1785" height="885" alt="graph" src="https://github.com/user-attachments/assets/3ff9912d-8b72-422e-b69a-46a5f390723c" />
+<img width="1424" height="764" alt="image" src="https://github.com/user-attachments/assets/e3c0a58b-bfe5-4746-8bfe-8cb57f7340a3" />
 
 ## Notes
 
