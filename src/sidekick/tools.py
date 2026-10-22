@@ -12,7 +12,7 @@ def web_search(query: str) -> str:
     """Search the web for current and factual information"""
 
     response = requests.post(
-        url=runtime.web.url,
+        url=str(runtime.web.url),
         json={"api_key": runtime.web.api_key, "query": query, "max_results": 3},
     )
 

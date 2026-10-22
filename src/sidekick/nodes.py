@@ -9,14 +9,14 @@ from sidekick.tools import web_search
 
 small_model = ChatOllama(
     model=runtime.models.small.name,
-    base_url=runtime.models.small.base_url,
+    base_url=str(runtime.models.small.base_url),
     num_ctx=runtime.models.small.num_ctx,
     temperature=runtime.models.small.temperature,
 )
 
 large_model = ChatOllama(
     model=runtime.models.large.name,
-    base_url=runtime.models.large.base_url,
+    base_url=str(runtime.models.large.base_url),
     num_ctx=runtime.models.large.num_ctx,
     temperature=runtime.models.large.temperature,
 )
