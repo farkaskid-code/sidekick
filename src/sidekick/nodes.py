@@ -41,7 +41,8 @@ def plan(state: State):
     return {
         "planning": ResearchPlan(
             topics=[topic.strip() for topic in topics.strip().splitlines()]
-        )
+        ),
+        "research": Research(topics=[]),
     }
 
 
@@ -79,9 +80,14 @@ def factcheck(state: State):
         response = search_agent.invoke(
             {"messages": messages}, config={"configurable": {"thread_id": "factcheck"}}
         )
-        print(response["messages"][-1].content)
 
-    return {}
+    accuracy = int(response["messages"][-1].content[:-1])
+    console.print(
+        f"Answer's Factual Accuracy: {accuracy}%",
+        style="red bold" if accuracy < 80 else "blue",
+    )
+
+    return {"factual_accuracy": accuracy}
 
 
 def critique(state: State):

@@ -39,6 +39,7 @@ class State(TypedDict):
     planning: ResearchPlan
     research: Research
     answer: str
+    factual_accuracy: int
     critique: Critique
     loop_count: int
 

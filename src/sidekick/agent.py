@@ -15,6 +15,10 @@ def needs_more_research(state: State):
     )
 
 
+def needs_more_accuracy(state: State):
+    return "no" if state["factual_accuracy"] > 80 else "yes"
+
+
 builder = StateGraph(State)
 
 builder.add_node("plan", plan)
@@ -28,7 +32,9 @@ builder.add_edge(START, "plan")
 builder.add_edge("plan", "research")
 builder.add_edge("research", "answer")
 builder.add_edge("answer", "factcheck")
-builder.add_edge("factcheck", "critique")
+builder.add_conditional_edges(
+    "factcheck", needs_more_accuracy, {"yes": "plan", "no": "critique"}
+)
 builder.add_conditional_edges(
     "critique", needs_more_research, {"yes": "research", "no": END}
 )
