@@ -32,6 +32,9 @@ class Critique(BaseModel):
     additional_research: list[str] = Field(
         description="Additional research topics if required"
     )
+    factual_accuracy: float = Field(
+        description="Represents the factual accuracy of the answer", le=1.0, ge=0.0
+    )
 
 
 class State(TypedDict):
