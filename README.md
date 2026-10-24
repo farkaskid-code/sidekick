@@ -49,7 +49,7 @@ Following diagram illustrates the general flow for each query.
 
 - Sidekick features a `researcher` <-> `critic` loop as a quality gate that ensures the coverage and research of numerous possible topics pertaining to a query. This can consume significant time and token budget.
 - It also features a `factcheck` <-> `planning` loop for factual accuracy. 
-- Planning and Research nodes call a search sub-agent for research with access to `web_search`.
-- Uses different size models for different roles. 
+- `Planning`, `Research` and `Factcheck` nodes call a web-search sub-agent.
+- Different nodes can use different size models for different roles. 
 - `Planning` and `Research` will use larger and smarter models as they don't need as much context.
 - `Critic` and `Answer` nodes will use a smaller model to fit more context.
