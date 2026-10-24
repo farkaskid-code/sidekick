@@ -32,9 +32,6 @@ class Critique(BaseModel):
     additional_research: list[str] = Field(
         description="Additional research topics if required"
     )
-    factual_accuracy: float = Field(
-        description="Represents the factual accuracy of the answer", le=1.0, ge=0.0
-    )
 
 
 class State(TypedDict):
@@ -66,7 +63,12 @@ PROMPT = {
         "and provide those research topics as additional research."
     ),
     "answer": (
-        "Your job is to craft a detailed answer based to the user "
+        "Your job is to craft a detailed answer for the user's "
         "question based on the research provided."
+    ),
+    "factcheck": (
+        "Your job is to factcheck the answer for a given question. "
+        "Use web_search when you need external and latest information. "
+        "Only output a percentage value for factual accuracy"
     ),
 }

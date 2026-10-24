@@ -67,6 +67,23 @@ def research(state: State):
     return {"research": new_research, "planning": ResearchPlan(topics=[])}
 
 
+def factcheck(state: State):
+    messages = [
+        SystemMessage(PROMPT.get("factcheck")),
+        HumanMessage(
+            f"## Question\n{state['question']}\n---\n### Answer\n{state['answer']}"
+        ),
+    ]
+
+    with console.status("[green]Checking facts..."):
+        response = search_agent.invoke(
+            {"messages": messages}, config={"configurable": {"thread_id": "factcheck"}}
+        )
+        print(response["messages"][-1].content)
+
+    return {}
+
+
 def critique(state: State):
     messages = [
         SystemMessage(PROMPT.get("critic")),
