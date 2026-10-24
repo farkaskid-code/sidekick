@@ -42,11 +42,13 @@ max_loops: 3 # Optional, caps the number of research <-> Critic loops.
 ## Agent Graph
 Following diagram illustrates the general flow for each query.
 
-<img width="1424" height="764" alt="image" src="https://github.com/user-attachments/assets/e3c0a58b-bfe5-4746-8bfe-8cb57f7340a3" />
+<img width="2760" height="1680" alt="research_agent_flow_dark_factcheck" src="https://github.com/user-attachments/assets/2aaa3f70-c7b4-49e6-829d-328cf52e9e9c" />
+
 
 ## Notes
 
-- Sidekick features a `researcher` <-> `critic` loop as a quality gate that ensures the coverages and research of all possible topics pertaining to a query. This can consume significant time and token budget.
+- Sidekick features a `researcher` <-> `critic` loop as a quality gate that ensures the coverage and research of numerous possible topics pertaining to a query. This can consume significant time and token budget.
+- It also features a `factcheck` <-> `planning` loop for factual accuracy. 
 - Planning and Research nodes call a search sub-agent for research with access to `web_search`.
 - Uses different size models for different roles. 
 - `Planning` and `Research` will use larger and smarter models as they don't need as much context.
