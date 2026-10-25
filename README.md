@@ -14,6 +14,12 @@ A research assistant designed for topical and deep research on any given query u
 - Create a configuration file. Details below.
 - Run using `sidekick {query}`
 
+It should look like this,
+
+<img width="1920" height="1036" alt="image" src="https://github.com/user-attachments/assets/3ebe56ce-39c6-4025-9013-3bd679e6e126" />
+
+in the above example, the answer is evaluated 3 times and then passed as `max_loops` has been set to 3.
+
 ## Configuration file
 The file is located at `~/.sidekick/config.yaml` with the following format,
 
@@ -43,7 +49,6 @@ max_loops: 3 # Optional, caps the number of research <-> Critic loops.
 Following diagram illustrates the general flow for each query.
 
 <img width="2760" height="1800" alt="research_agent_flow_dark_factcheck_toolloop" src="https://github.com/user-attachments/assets/5dbe273d-5b41-4d96-9189-07c0b1a73619" />
-
 
 ## Notes
 
