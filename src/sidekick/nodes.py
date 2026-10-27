@@ -7,7 +7,6 @@ from rich.console import Console
 from sidekick.config import Role, runtime
 from sidekick.data import PROMPT, Critique, Information, Research, ResearchPlan, State
 from sidekick.search import search_agent
-from sidekick.tools import web_search
 
 
 def get_model(role: Role):
@@ -24,8 +23,6 @@ def get_model(role: Role):
 critic_model = get_model(runtime.roles.critic)
 answer_model = get_model(runtime.roles.answer)
 
-
-# research_model = large_model.bind_tools([web_search])
 
 console = Console()
 log = logging.getLogger(__name__)
