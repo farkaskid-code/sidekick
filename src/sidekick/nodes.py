@@ -4,26 +4,28 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from rich.console import Console
 
-from sidekick.config import runtime
+from sidekick.config import Role, runtime
 from sidekick.data import PROMPT, Critique, Information, Research, ResearchPlan, State
 from sidekick.search import search_agent
 from sidekick.tools import web_search
 
-small_model = ChatOllama(
-    model=runtime.models.small.name,
-    base_url=str(runtime.models.small.base_url),
-    num_ctx=runtime.models.small.num_ctx,
-    temperature=runtime.models.small.temperature,
-)
 
-large_model = ChatOllama(
-    model=runtime.models.large.name,
-    base_url=str(runtime.models.large.base_url),
-    num_ctx=runtime.models.large.num_ctx,
-    temperature=runtime.models.large.temperature,
-)
+def get_model(role: Role):
+    model_size = runtime.models.small if role.model == "small" else runtime.models.large
 
-research_model = large_model.bind_tools([web_search])
+    return ChatOllama(
+        model=model_size.name,
+        base_url=str(model_size.base_url),
+        num_ctx=role.num_ctx,
+        temperature=role.temperature,
+    )
+
+
+critic_model = get_model(runtime.roles.critic)
+answer_model = get_model(runtime.roles.answer)
+
+
+# research_model = large_model.bind_tools([web_search])
 
 console = Console()
 log = logging.getLogger(__name__)
@@ -111,7 +113,7 @@ def critique(state: State):
         ),
     ]
     with console.status("[green]Evaluating the answer"):
-        response: Critique = small_model.with_structured_output(Critique).invoke(
+        response: Critique = critic_model.with_structured_output(Critique).invoke(
             messages
         )
 
@@ -139,7 +141,7 @@ def answer(state: State):
         ),
     ]
     with console.status("[green]Drafting the answer..."):
-        response = small_model.invoke(messages)
+        response = answer_model.invoke(messages)
 
     log.info("Drafted the answer")
     return {"answer": response.content}

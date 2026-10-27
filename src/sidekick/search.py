@@ -22,8 +22,8 @@ builder = StateGraph(SearchState)
 search_model = ChatOllama(
     model=runtime.models.small.name,
     base_url=str(runtime.models.small.base_url),
-    num_ctx=runtime.models.small.num_ctx,
-    temperature=runtime.models.small.temperature,
+    num_ctx=40960,
+    temperature=0.7,
 ).bind_tools([web_search])
 
 console = Console()

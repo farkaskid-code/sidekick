@@ -40,10 +40,10 @@ class Role(BaseModel):
 class Roles(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    plan: Role
-    research: Role
+    plan: Role = None
+    research: Role = None
     answer: Role
-    factcheck: Role
+    factcheck: Role = None
     critic: Role
 
 
