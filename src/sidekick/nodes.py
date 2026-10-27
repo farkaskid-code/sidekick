@@ -1,3 +1,5 @@
+import logging
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from rich.console import Console
@@ -24,9 +26,11 @@ large_model = ChatOllama(
 research_model = large_model.bind_tools([web_search])
 
 console = Console()
+log = logging.getLogger(__name__)
 
 
 def plan(state: State):
+    log.info(f"Planning started for: {state['question']}")
     messages = [
         SystemMessage(PROMPT.get("plan")),
         HumanMessage(f"question: {state['question']}"),
@@ -37,38 +41,43 @@ def plan(state: State):
             config={"configurable": {"thread_id": "planning_search"}},
         )
 
-    topics = response.get("messages")[-1].content
+    content = response.get("messages")[-1].content
+    topics = [topic.strip() for topic in content.strip().splitlines()]
+    log.info(f"Planned to research topics: {topics}")
     return {
-        "planning": ResearchPlan(
-            topics=[topic.strip() for topic in topics.strip().splitlines()]
-        ),
+        "planning": ResearchPlan(topics=topics),
         "research": Research(topics=[]),
     }
 
 
 def research(state: State):
+    log.info("Starting Research...")
     system_msg = SystemMessage(PROMPT.get("research"))
     topics_info = []
     for topic in state["planning"].topics:
+        log.info(f"Researching topic: {topic}")
         with console.status(f"[green]Researching: {topic}"):
             response = search_agent.invoke(
                 {"messages": [system_msg, HumanMessage(topic)]},
                 config={"configurable": {"thread_id": "search"}},
             )
-        topics_info.append(
-            Information(topic=topic, content=response["messages"][-1].content)
-        )
+            info = Information(topic=topic, content=response["messages"][-1].content)
+            log.debug(f"Info from research: {info}")
+        topics_info.append(info)
+        log.info(f"Completed research for: {topic}")
         console.print(f"Researched: {topic}", style="yellow")
 
     new_research = Research(topics=topics_info)
     existing_research = state.get("research", None)
     if existing_research:
+        log.info("Adding new information to the previous research")
         new_research = Research(topics=existing_research.topics + topics_info)
 
     return {"research": new_research, "planning": ResearchPlan(topics=[])}
 
 
 def factcheck(state: State):
+    log.info("Factchecking the answer")
     messages = [
         SystemMessage(PROMPT.get("factcheck")),
         HumanMessage(
@@ -82,6 +91,7 @@ def factcheck(state: State):
         )
 
     accuracy = int(response["messages"][-1].content[:-1])
+    log.info(f"Answer's accuracy: {accuracy}")
     console.print(
         f"Answer's Factual Accuracy: {accuracy}%",
         style="red bold" if accuracy < 80 else "blue",
@@ -91,6 +101,7 @@ def factcheck(state: State):
 
 
 def critique(state: State):
+    log.info("Critiquing the answer")
     messages = [
         SystemMessage(PROMPT.get("critic")),
         HumanMessage(
@@ -109,6 +120,9 @@ def critique(state: State):
         style="green" if len(response.additional_research) == 0 else "red",
     )
 
+    log.info(f"Answer's critique: {response.notes}")
+    log.info(f"Additional research topics: {response.additional_research}")
+
     return {
         "critique": response,
         "loop_count": state["loop_count"] + 1,
@@ -117,12 +131,15 @@ def critique(state: State):
 
 
 def answer(state: State):
+    log.info("Drafting the answer")
     messages = [
         SystemMessage(PROMPT.get("answer")),
         HumanMessage(
             f"## Question\n{state['question']}\n\n## Research\n{state['research']}"
         ),
     ]
-    with console.status("[green]Crafting the answer..."):
+    with console.status("[green]Drafting the answer..."):
         response = small_model.invoke(messages)
+
+    log.info("Drafted the answer")
     return {"answer": response.content}

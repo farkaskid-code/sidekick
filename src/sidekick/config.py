@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Literal
 
@@ -47,3 +48,8 @@ class Config(BaseModel):
 
 
 runtime = Config.model_validate(safe_load(Path(DATADIR / "config.yaml").read_text()))
+logging.basicConfig(
+    filename=DATADIR / "app.log",
+    filemode=runtime.logging.mode,
+    level=runtime.logging.level,
+)
