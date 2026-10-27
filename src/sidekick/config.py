@@ -20,8 +20,6 @@ class Model(BaseModel):
 
     base_url: HttpUrl
     name: str
-    num_ctx: int = 4096
-    temperature: float = 0.7
 
 
 class Models(BaseModel):
@@ -29,6 +27,24 @@ class Models(BaseModel):
 
     small: Model
     large: Model
+
+
+class Role(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    model: Literal["small", "large"]
+    num_ctx: int = 4096
+    temperature: float = 0.7
+
+
+class Roles(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    plan: Role
+    research: Role
+    answer: Role
+    factcheck: Role
+    critic: Role
 
 
 class Web(BaseModel):
@@ -42,6 +58,7 @@ class Config(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     models: Models
+    roles: Roles
     logging: Logging = Logging()
     web: Web
     max_loops: int = 3
