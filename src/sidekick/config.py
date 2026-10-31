@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import Literal
 
+from langchain_ollama import ChatOllama
 from pydantic import BaseModel, ConfigDict, HttpUrl
 from yaml import safe_load
 
@@ -29,7 +30,7 @@ class Models(BaseModel):
     large: Model
 
 
-class Role(BaseModel):
+class ModelInfo(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     model: Literal["small", "large"]
@@ -37,14 +38,17 @@ class Role(BaseModel):
     temperature: float = 0.7
 
 
+type Role = Literal["plan", "research", "answer", "factcheck", "critic"]
+
+
 class Roles(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    plan: Role = None
-    research: Role = None
-    answer: Role
-    factcheck: Role = None
-    critic: Role
+    plan: ModelInfo = None
+    research: ModelInfo = None
+    answer: ModelInfo = None
+    factcheck: ModelInfo = None
+    critic: ModelInfo = None
 
 
 class Web(BaseModel):
@@ -70,3 +74,20 @@ logging.basicConfig(
     filemode=runtime.logging.mode,
     level=runtime.logging.level,
 )
+
+
+def get_model(role: Role):
+    model_params: ModelInfo = runtime.roles.__getattribute__(role)
+
+    model_size = (
+        runtime.models.small
+        if model_params and model_params.model == "small"
+        else runtime.models.large
+    )
+
+    return ChatOllama(
+        model=model_size.name,
+        base_url=str(model_size.base_url),
+        num_ctx=model_params.num_ctx if model_params else None,
+        temperature=model_params.temperature if model_params else None,
+    )

@@ -2,6 +2,8 @@ from typing import TypedDict
 
 from pydantic import BaseModel, Field
 
+from sidekick.config import Role
+
 
 class ResearchPlan(BaseModel):
     topics: list[str] = Field(description="List of research topics")
@@ -44,7 +46,7 @@ class State(TypedDict):
     loop_count: int
 
 
-PROMPT = {
+PROMPT: dict[Role, str] = {
     "plan": (
         "You are research planner whose job is to provide 3-4 topics"
         " that should be researched to answer the user's query? "

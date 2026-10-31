@@ -1,47 +1,27 @@
 import logging
 
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_ollama import ChatOllama
 from rich.console import Console
 
-from sidekick.config import Role, runtime
+from sidekick.config import get_model
 from sidekick.data import PROMPT, Critique, Information, Research, ResearchPlan, State
-from sidekick.search import search_agent
-
-
-def get_model(role: Role):
-    model_size = runtime.models.small if role.model == "small" else runtime.models.large
-
-    return ChatOllama(
-        model=model_size.name,
-        base_url=str(model_size.base_url),
-        num_ctx=role.num_ctx,
-        temperature=role.temperature,
-    )
-
-
-critic_model = get_model(runtime.roles.critic)
-answer_model = get_model(runtime.roles.answer)
-
+from sidekick.search import SearchAgent
 
 console = Console()
 log = logging.getLogger(__name__)
 
+plan_agent = SearchAgent("plan")
+
 
 def plan(state: State):
     log.info(f"Planning started for: {state['question']}")
-    messages = [
-        SystemMessage(PROMPT.get("plan")),
-        HumanMessage(f"question: {state['question']}"),
-    ]
+
     with console.status("[green]Planning..."):
-        response = search_agent.invoke(
-            {"messages": messages},
-            config={"configurable": {"thread_id": "planning_search"}},
-        )
+        response = plan_agent.run(state["question"])
 
     content = response.get("messages")[-1].content
     topics = [topic.strip() for topic in content.strip().splitlines()]
+
     log.info(f"Planned to research topics: {topics}")
     return {
         "planning": ResearchPlan(topics=topics),
@@ -49,19 +29,21 @@ def plan(state: State):
     }
 
 
+research_agent = SearchAgent("research")
+
+
 def research(state: State):
     log.info("Starting Research...")
-    system_msg = SystemMessage(PROMPT.get("research"))
     topics_info = []
+
     for topic in state["planning"].topics:
         log.info(f"Researching topic: {topic}")
+
         with console.status(f"[green]Researching: {topic}"):
-            response = search_agent.invoke(
-                {"messages": [system_msg, HumanMessage(topic)]},
-                config={"configurable": {"thread_id": "search"}},
-            )
+            response = research_agent.run(topic)
             info = Information(topic=topic, content=response["messages"][-1].content)
             log.debug(f"Info from research: {info}")
+
         topics_info.append(info)
         log.info(f"Completed research for: {topic}")
         console.print(f"Researched: {topic}", style="yellow")
@@ -75,18 +57,15 @@ def research(state: State):
     return {"research": new_research, "planning": ResearchPlan(topics=[])}
 
 
+factcheck_agent = SearchAgent("factcheck")
+
+
 def factcheck(state: State):
     log.info("Factchecking the answer")
-    messages = [
-        SystemMessage(PROMPT.get("factcheck")),
-        HumanMessage(
-            f"## Question\n{state['question']}\n---\n### Answer\n{state['answer']}"
-        ),
-    ]
 
     with console.status("[green]Checking facts..."):
-        response = search_agent.invoke(
-            {"messages": messages}, config={"configurable": {"thread_id": "factcheck"}}
+        response = factcheck_agent.run(
+            f"## Question\n{state['question']}\n---\n### Answer\n{state['answer']}"
         )
 
     accuracy = int(response["messages"][-1].content[:-1])
@@ -97,6 +76,9 @@ def factcheck(state: State):
     )
 
     return {"factual_accuracy": accuracy}
+
+
+critic_model = get_model("critic")
 
 
 def critique(state: State):
@@ -127,6 +109,9 @@ def critique(state: State):
         "loop_count": state["loop_count"] + 1,
         "planning": ResearchPlan(topics=response.additional_research),
     }
+
+
+answer_model = get_model("answer")
 
 
 def answer(state: State):
