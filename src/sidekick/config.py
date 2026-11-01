@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Literal
 
 from langchain_ollama import ChatOllama
-from pydantic import BaseModel, ConfigDict, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 from yaml import safe_load
 
 DATADIR = Path.home() / ".sidekick"
@@ -44,11 +44,21 @@ type Role = Literal["plan", "research", "answer", "factcheck", "critic"]
 class Roles(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    plan: ModelInfo = None
-    research: ModelInfo = None
-    answer: ModelInfo = None
-    factcheck: ModelInfo = None
-    critic: ModelInfo = None
+    plan: ModelInfo = Field(
+        default_factory=lambda: ModelInfo(model="large", num_ctx=4096, temperature=0.3)
+    )  # Complex topic breakdown needs reasoning
+    research: ModelInfo = Field(
+        default_factory=lambda: ModelInfo(model="large", num_ctx=4096, temperature=0.7)
+    )  # Synthesis of multiple sources needs smart model
+    answer: ModelInfo = Field(
+        default_factory=lambda: ModelInfo(model="small", num_ctx=32768, temperature=0.9)
+    )  # Text drafting doesn't need large context
+    factcheck: ModelInfo = Field(
+        default_factory=lambda: ModelInfo(model="large", num_ctx=4096, temperature=0.5)
+    )  # Accuracy critical needs smart model
+    critic: ModelInfo = Field(
+        default_factory=lambda: ModelInfo(model="small", num_ctx=32768, temperature=0.7)
+    )  # Evaluation benefits from large context window
 
 
 class Web(BaseModel):
